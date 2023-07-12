@@ -15,7 +15,7 @@ await m.getUsersWhoFavoritedPost({instanceDomain:"mastodon.social", statusId:"11
 await m.getUsersWhoBoostedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"});
 await m.getParentsAndChildrenOfPost({instanceDomain:"mastodon.social", statusId:"110697449558194709"});
 await m.getPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"});
-await m.getUsersKnownToInstance({instanceDomain:"mastodon.social", maxItems:10});
+await m.getUsersKnownToInstance({instanceDomain:"mastodon.social", maxItems:100});
 ```
 
 Note: `userHandle` can be of the form `arstechnica@mastodon.social` or `@arstechnica@mastodon.social`.
