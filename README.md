@@ -3,7 +3,7 @@ Simple JS functions for interacting with the public (i.e. no Auth) Mastodon data
 
 ## Usage:
 ```js
-import * as m from "./mod.js";
+import * as m from "https://cdn.jsdelivr.net/gh/josephrocca/public-mastodon-data.js@0.0.1/mod.js";
 await m.getPostsByUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
 await m.getFollowersOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
 await m.getFolloweesOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100)
