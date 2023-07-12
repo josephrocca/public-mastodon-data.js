@@ -3,15 +3,15 @@ Simple JS functions for interacting with the public (i.e. no Auth) Mastodon data
 
 ## Usage:
 ```js
-import { getPostsByUser, getFollowersOfUser, getFolloweesOfUser, getTimelinePosts, getTimelinePostsByTag, getUsersWhoFavoritedPost, getUsersWhoBoostedPost, getParentsAndChildrenOfPost, getPost, getUsersKnownToInstance } from "./mod.js";
-await getPostsByUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
-await getFollowersOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
-await getFolloweesOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100)
-await getTimelinePosts({instanceDomain:"mastodon.social", maxItems:100})
-await getTimelinePostsByTag({instanceDomain:"mastodon.social", tag:"cat", maxItems:100})
-await getUsersWhoFavoritedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-await getUsersWhoBoostedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-await getParentsAndChildrenOfPost({instanceDomain:"mastodon.social", statusId:"110697449558194709"})
-await getPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-await getUsersKnownToInstance({instanceDomain:"mastodon.social", maxItems:10})
+import * as m from "./mod.js";
+await m.getPostsByUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
+await m.getFollowersOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
+await m.getFolloweesOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100)
+await m.getTimelinePosts({instanceDomain:"mastodon.social", maxItems:100})
+await m.getTimelinePostsByTag({instanceDomain:"mastodon.social", tag:"cat", maxItems:100})
+await m.getUsersWhoFavoritedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
+await m.getUsersWhoBoostedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
+await m.getParentsAndChildrenOfPost({instanceDomain:"mastodon.social", statusId:"110697449558194709"})
+await m.getPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
+await m.getUsersKnownToInstance({instanceDomain:"mastodon.social", maxItems:10})
 ```
