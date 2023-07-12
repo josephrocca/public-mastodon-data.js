@@ -1,15 +1,3 @@
-// Examples:
-// await getPostsByUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
-// await getFollowersOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100})
-// await getFolloweesOfUser({userHandle:"arstechnica@mastodon.social", maxItems:100)
-// await getTimelinePosts({instanceDomain:"mastodon.social", maxItems:100})
-// await getTimelinePostsByTag({instanceDomain:"mastodon.social", tag:"cat", maxItems:100})
-// await getUsersWhoFavoritedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-// await getUsersWhoBoostedPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-// await getParentsAndChildrenOfPost({instanceDomain:"mastodon.social", statusId:"110697449558194709"})
-// await getPost({instanceDomain:"mastodon.social", statusId:"110697430691266528"})
-// await getUsersKnownToInstance({instanceDomain:"mastodon.social", maxItems:10})
-
 export async function getPostsByUser({userHandle, excludeReplies=null, excludeBoosts=null, isTaggedWith=null, isPinned=null, onlyPostsWithMedia=null, maxItems=1000, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
   let instanceDomain = userHandle.split("@")[1];
@@ -57,18 +45,18 @@ export async function getTimelinePostsByTag({instanceDomain, tag, hasAnyOfTheseT
   return _getPaginatedItems({url, maxItems, startFromId, idDirection, progressCallback});
 }
 
-export async function getUsersWhoFavoritedPost({instanceDomain, statusId, maxItems=1000, progressCallback=null}={}) {
-  let url = `https://${instanceDomain}/api/v1/statuses/${statusId}/favourited_by?limit=80`;
+export async function getUsersWhoFavoritedPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+  let url = `https://${instanceDomain}/api/v1/statuses/${postId}/favourited_by?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getUsersWhoBoostedPost({instanceDomain, statusId, maxItems=1000, progressCallback=null}={}) {
-  let url = `https://${instanceDomain}/api/v1/statuses/${statusId}/reblogged_by?limit=80`;
+export async function getUsersWhoBoostedPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+  let url = `https://${instanceDomain}/api/v1/statuses/${postId}/reblogged_by?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getParentsAndChildrenOfPost({instanceDomain, statusId, maxItems=1000, progressCallback=null}={}) {
-  let url = `https://${instanceDomain}/api/v1/statuses/${statusId}/context`;
+export async function getParentsAndChildrenOfPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+  let url = `https://${instanceDomain}/api/v1/statuses/${postId}/context`;
   let response = await fetch(url);
   let data = await response.json();
   let parents = data.ancestors;
@@ -76,8 +64,8 @@ export async function getParentsAndChildrenOfPost({instanceDomain, statusId, max
   return {parents, children};
 }
 
-export async function getPost({instanceDomain, statusId}) {
-  let url = `https://${instanceDomain}/api/v1/statuses/${statusId}`;
+export async function getPost({instanceDomain, postId}) {
+  let url = `https://${instanceDomain}/api/v1/statuses/${postId}`;
   let response = await fetch(url);
   let data = await response.json();
   return data;
