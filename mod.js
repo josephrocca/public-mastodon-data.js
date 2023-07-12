@@ -1,4 +1,4 @@
-export async function getPostsByUser({userHandle, excludeReplies=null, excludeBoosts=null, isTaggedWith=null, isPinned=null, onlyPostsWithMedia=null, maxItems=1000, progressCallback=null}={}) {
+export async function getPostsByUser({userHandle, excludeReplies=null, excludeBoosts=null, isTaggedWith=null, isPinned=null, onlyPostsWithMedia=null, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
   let instanceDomain = userHandle.split("@")[1];
 
@@ -12,21 +12,21 @@ export async function getPostsByUser({userHandle, excludeReplies=null, excludeBo
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getFollowersOfUser({userHandle, maxItems=1000, progressCallback=null}={}) {
+export async function getFollowersOfUser({userHandle, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
   let instanceDomain = userHandle.split("@")[1];
   let url = `https://${instanceDomain}/api/v1/accounts/${userId}/followers?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getFolloweesOfUser({userHandle, maxItems=1000, progressCallback=null}={}) {
+export async function getFolloweesOfUser({userHandle, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
   let instanceDomain = userHandle.split("@")[1];
   let url = `https://${instanceDomain}/api/v1/accounts/${userId}/following?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getTimelinePosts({instanceDomain, onlyLocalPosts=null, onlyRemotePosts=null, onlyPostsWithMedia=null, maxItems=1000, startFromId=null, idDirection="descending", progressCallback=null}={}) {
+export async function getTimelinePosts({instanceDomain, onlyLocalPosts=null, onlyRemotePosts=null, onlyPostsWithMedia=null, maxItems=200, startFromId=null, idDirection="descending", progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/timelines/public?limit=80`;
   if(onlyLocalPosts !== null) url += `&local=${onlyLocalPosts}`;
   if(onlyRemotePosts !== null) url += `&remote=${onlyRemotePosts}`;
@@ -34,7 +34,7 @@ export async function getTimelinePosts({instanceDomain, onlyLocalPosts=null, onl
   return _getPaginatedItems({url, maxItems, startFromId, idDirection, progressCallback});
 }
 
-export async function getTimelinePostsByTag({instanceDomain, tag, hasAnyOfTheseTags=null, hasAllOfTheseTags=null, hasNoneOfTheseTags=null, onlyLocalPosts=null, onlyRemotePosts=null, onlyPostsWithMedia=null, maxItems=1000, startFromId=null, idDirection="descending", progressCallback=null}={}) {
+export async function getTimelinePostsByTag({instanceDomain, tag, hasAnyOfTheseTags=null, hasAllOfTheseTags=null, hasNoneOfTheseTags=null, onlyLocalPosts=null, onlyRemotePosts=null, onlyPostsWithMedia=null, maxItems=200, startFromId=null, idDirection="descending", progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/timelines/tag/${tag}?limit=80`;
   if(hasAnyOfTheseTags !== null) url += `&any=${hasAnyOfTheseTags}`;
   if(hasAllOfTheseTags !== null) url += `&all=${hasAllOfTheseTags}`;
@@ -45,17 +45,17 @@ export async function getTimelinePostsByTag({instanceDomain, tag, hasAnyOfTheseT
   return _getPaginatedItems({url, maxItems, startFromId, idDirection, progressCallback});
 }
 
-export async function getUsersWhoFavoritedPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+export async function getUsersWhoFavoritedPost({instanceDomain, postId, maxItems=200, progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/statuses/${postId}/favourited_by?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getUsersWhoBoostedPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+export async function getUsersWhoBoostedPost({instanceDomain, postId, maxItems=200, progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/statuses/${postId}/reblogged_by?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
-export async function getParentsAndChildrenOfPost({instanceDomain, postId, maxItems=1000, progressCallback=null}={}) {
+export async function getParentsAndChildrenOfPost({instanceDomain, postId, maxItems=200, progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/statuses/${postId}/context`;
   let response = await fetch(url);
   let data = await response.json();
@@ -71,7 +71,7 @@ export async function getPost({instanceDomain, postId}) {
   return data;
 }
 
-export async function getUsersKnownToInstance({instanceDomain, localUsersOnly=false, maxItems=1000, order=null, progressCallback=null}={}) {
+export async function getUsersKnownToInstance({instanceDomain, localUsersOnly=false, maxItems=200, order=null, progressCallback=null}={}) {
   let url = `https://${instanceDomain}/api/v1/directory?limit=80`;
   if(localUsersOnly) url += "&local=1";
   if(order) url += `&order=${order}`; // order can be 'active' (default - recently active users first) or 'new' (new users first)
