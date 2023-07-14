@@ -1,5 +1,7 @@
 export async function getPostsByUser({userHandle, excludeReplies=null, excludeBoosts=null, isTaggedWith=null, isPinned=null, onlyPostsWithMedia=null, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
+  
+  if(userHandle.startsWith("@")) userHandle = userHandle.slice(1);
   let instanceDomain = userHandle.split("@")[1];
 
   let url = `https://${instanceDomain}/api/v1/accounts/${userId}/statuses?limit=80`;
@@ -14,14 +16,20 @@ export async function getPostsByUser({userHandle, excludeReplies=null, excludeBo
 
 export async function getFollowersOfUser({userHandle, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
+  
+  if(userHandle.startsWith("@")) userHandle = userHandle.slice(1);
   let instanceDomain = userHandle.split("@")[1];
+  
   let url = `https://${instanceDomain}/api/v1/accounts/${userId}/followers?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
 
 export async function getFolloweesOfUser({userHandle, maxItems=200, progressCallback=null}={}) {
   let userId = await userHandleToId({userHandle});
+
+  if(userHandle.startsWith("@")) userHandle = userHandle.slice(1);
   let instanceDomain = userHandle.split("@")[1];
+  
   let url = `https://${instanceDomain}/api/v1/accounts/${userId}/following?limit=80`;
   return _getPaginatedItems({url, maxItems, progressCallback});
 }
