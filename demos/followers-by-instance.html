@@ -87,7 +87,7 @@
       runAnalysis();
     }
     
-    function downloadData() {
+    window.downloadData = function() {
       downloadTextOrBlob(JSON.stringify(data), `${instanceDomainInputEl.value}-${usernameInputEl.value}-${dataTypeSelectEl.value}-data.json`);
     }
     
