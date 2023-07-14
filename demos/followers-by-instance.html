@@ -67,7 +67,7 @@
   
   <script type="module">
 
-    let pmd = await import("https://cdn.jsdelivr.net/gh/josephrocca/public-mastodon-data.js@0.0.3/mod.js");
+    let pmd = await import("https://cdn.jsdelivr.net/gh/josephrocca/public-mastodon-data.js@0.0.5/mod.js");
     
     let data;
     let accounts;
@@ -75,13 +75,25 @@
       let maxItems = Number(maxItemsInputEl.value);
       let progressCallback = (data) => { loadStatusEl.innerHTML = data.message; };
 
-      if(dataTypeSelectEl.value === "followers") {
-        data = await pmd.getFollowersOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
-      } else if(dataTypeSelectEl.value === "following") {
-        data = await pmd.getFolloweesOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
+      try {
+        if(dataTypeSelectEl.value === "followers") {
+          data = await pmd.getFollowersOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
+        } else if(dataTypeSelectEl.value === "following") {
+          data = await pmd.getFolloweesOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
+        }
+      } catch(e) {
+        alert(e.message.replace(/record/i, "User"));
+        loadStatusEl.innerHTML = "";
+        return;
+      }
+
+      loadStatusEl.innerHTML = "";
+
+      if(data.length === 0) {
+        alert(`No ${dataTypeSelectEl.value === "followers" ? "followers" : "followees"} found. This could be because ${accountsInputEl.value} has enabled the 'hide your social graph' privacy setting, or because they have no ${dataTypeSelectEl.value === "followers" ? "followers" : "followees"}.`);
+        return;
       }
       
-      loadStatusEl.innerHTML = "";
       downloadDataBtn.style.display = "";
 
       await runAnalysis();
