@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Mastodon Follower/Following Analysis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+  
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    * {
+      font-family: inherit;
+      font-size: inherit;
+      box-sizing: border-box;
+    }
+
+    #initialInputsCtn select, #initialInputsCtn input {
+      width:-webkit-fill-available;
+      width:fill-available;
+    }
+  </style>
+  
+  <div>
+    <p>A little tool to visualise which Mastodon instances most of your followers are from, to demonstrate <a href="https://github.com/josephrocca/public-mastodon-data.js" target="_blank">public-mastodon-data.js</a>. It's all done within your browser tab (i.e. no server) and no permissions are required.</p>
+  </div>
+  
+  <div id="initialInputsCtn" style="width:450px;">
+    <table style="width:100%;">
+      <tr>
+        <td>account:</td>
+        <td><input id="accountsInputEl" placeholder="@example@mastodon.social" value="@arstechnica@mastodon.social"></td>
+      <tr>
+      <tr>
+        <td>data type:</td>
+        <td>
+          <select id="dataTypeSelectEl">
+            <option value="followers">followers</option>
+            <option value="following">following</option>
+          </select>
+        </td>
+      <tr>
+      <tr>
+        <td>max users to download:</td>
+        <td><input id="maxItemsInputEl" value="500" type="number"></td>
+      <tr>
+    </table>
+    <div style="margin-top:0.5rem;">
+      <button onclick="initialInputsCtn.querySelectorAll('button, select, input').forEach(el => el.disabled=true); initialInputsCtn.style.opacity=0.5; this.remove(); loadStatusEl.innerHTML='loading...'; start();">load data &amp; analyse</button> <span id="loadStatusEl"></span>
+    </div>
+  </div>
+  
+  <hr>
+  
+  <button id="downloadDataBtn" style="display:none;" onclick="downloadData(); this.remove();">download data as json</button>
+
+  <div id="analysisStatusEl" style="margin-top:0.5rem;"></div>
+
+  <div id="chartjsLoadStatusEl"></div>
+  
+  <div id="analysisOutputCtn" style="max-width:900px; margin:0 auto; margin-top:0.5rem; margin-bottom:3rem;"></div>
+    
+  
+  <script type="module">
+
+    let pmd = await import("https://cdn.jsdelivr.net/gh/josephrocca/public-mastodon-data.js@0.0.3/mod.js");
+    
+    let data;
+    let accounts;
+    window.start = async function() {
+      let maxItems = Number(maxItemsInputEl.value);
+      let progressCallback = (data) => { loadStatusEl.innerHTML = data.message; };
+
+      if(dataTypeSelectEl.value === "followers") {
+        data = await pmd.getFollowersOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
+      } else if(dataTypeSelectEl.value === "following") {
+        data = await pmd.getFolloweesOfUser({userHandle: accountsInputEl.value, maxItems, progressCallback});
+      }
+      
+      loadStatusEl.innerHTML = "finished.";
+      downloadDataBtn.style.display = "";
+
+      runAnalysis();
+    }
+    
+    function downloadData() {
+      downloadTextOrBlob(JSON.stringify(data), `${instanceDomainInputEl.value}-${usernameInputEl.value}-${dataTypeSelectEl.value}-data.json`);
+    }
+    
+    async function runAnalysis() {
+      while(!window.Chart) {
+        chartjsLoadStatusEl.innerHTML = "loading Chart.js...";
+        await new Promise(r => setTimeout(r, 500));
+      }
+      chartjsLoadStatusEl.innerHTML = "";
+      
+      await displayInstanceDomainCountCharts({data});
+    }
+    
+    async function displayInstanceDomainCountCharts({data}) {
+      let instanceDomainCounts = data.reduce((counts, obj) => {
+        let hostname = new URL(obj.url).hostname;
+        counts[hostname] = (counts[hostname] || 0) + 1;
+        return counts;
+      }, {});
+      
+      let labelCountEntries = Object.entries(instanceDomainCounts);
+      labelCountEntries.sort((a, b) => b[1] - a[1]);
+      
+      let labels = labelCountEntries.map(pair => pair[0]);
+      let counts = labelCountEntries.map(pair => pair[1]);
+      
+      if(labels.length > 30) {
+        analysisStatusEl.innerHTML = `<b style="color:red;">Only the top 30 instances are shown.</b>`;
+        labels = labels.slice(0, 30);
+        counts = counts.slice(0, 30);
+      }
+
+      analysisOutputCtn.append(createBarChart({labels, counts}));
+      analysisOutputCtn.append(createPieChart({labels, counts}));
+    };
+    
+    function createPieChart({labels, counts}) {
+      let pieChartElement = document.createElement('canvas');
+      
+      let totalCount = counts.reduce((a,v) => a+v, 0);
+      let accumulatedRadians = 0;
+
+      let slices = counts.map((count, index) => {
+        let startAngle = 2 * Math.PI * accumulatedRadians / totalCount;
+        let endAngle = 2 * Math.PI * (accumulatedRadians + count) / totalCount;
+        accumulatedRadians += count;
+
+        return { count, startAngle, endAngle, label: labels[index] };
+      });
+      
+      const maxSlicePercentageToDisplayLabelHorizontally = 20;
+
+      new Chart(pieChartElement, {
+        type: 'pie',
+        plugins: [ChartDataLabels],
+        data: {
+          labels: labels,
+          datasets: [{
+            data: counts,
+            backgroundColor: labels.map((label, i) => `hsl(${i / labels.length * 360}, 100%, 75%)`)
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              display: false
+            },
+            datalabels: {
+              color: '#000000',
+              formatter: (value, context) => {
+                let percentage = (context.dataset.data[context.dataIndex] / totalCount) * 100;
+                let label = "";
+                if(percentage >= 1) {
+                  label = context.chart.data.labels[context.dataIndex];
+                }
+                return label;
+              },
+              font: function(context) {
+                let percentage = (context.dataset.data[context.dataIndex] / totalCount) * 100;
+                let width = context.chart.width;
+                let size = Math.round(width / 32);
+                if(percentage < maxSlicePercentageToDisplayLabelHorizontally) {
+                  size = Math.round(width / 32) * (percentage/(maxSlicePercentageToDisplayLabelHorizontally/4));
+                  if(size > Math.round(width / 32)) {
+                    size = Math.round(width / 32);
+                  }
+                }
+                return {
+                  size: size,
+                  weight: 'bold',
+                };
+              },
+              textAlign: 'center',
+              rotation: function(context) {
+                let slice = slices[context.dataIndex];
+                let midAngle = (slice.startAngle + slice.endAngle) / 2;
+
+                // Convert to degrees, adjust by -90 to rotate from "12 o'clock"
+                let rotation = (midAngle * (180 / Math.PI)) - 90;
+
+                let percentage = (slice.count / totalCount) * 100;
+                if (percentage > maxSlicePercentageToDisplayLabelHorizontally || context.chart.data.labels[context.dataIndex].length <= 4) {
+                  rotation = 0;
+                } else if (rotation > 90 && rotation <= 270) {
+                  // Check if the text would be upside-down and, if so, adjust the rotation
+                  rotation = (rotation + 180) % 360;
+                }
+                return rotation;
+              }
+            },
+          },
+        },
+      });
+      
+      pieChartElement.style.marginTop = "1rem";
+
+      return pieChartElement;
+    }
+
+    function createBarChart({labels, counts}) {
+
+      let barChartElement = document.createElement('canvas');
+
+      new Chart(barChartElement, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            //label: 'Counts',
+            data: counts,
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
+        },
+      });
+
+      barChartElement.style.marginTop = "1rem";
+
+      return barChartElement;
+    }
+    
+    function downloadTextOrBlob(textOrBlob, filename) {
+      let blob;
+      if(typeof textOrBlob === "string") blob = new Blob([textOrBlob], {type: "application/json"});
+      else blob = textOrBlob;
+
+      const dataUri = URL.createObjectURL(blob);
+      let linkElement = document.createElement("a");
+      linkElement.setAttribute("href", dataUri);
+      linkElement.setAttribute("download", filename);
+      linkElement.click();
+      linkElement.remove();
+      setTimeout(() => URL.revokeObjectURL(dataUri), 30*1000);
+    }
+    
+  </script>
+</body>
+</html>
