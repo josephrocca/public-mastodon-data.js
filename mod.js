@@ -135,6 +135,7 @@ async function _getPaginatedItems({url, maxItems, startFromId=null, idDirection=
       items.push(item);
     }
     if(finished) break;
+    if(newItems.length === 0) break;
     if(response.headers.get("Link")?.includes(`rel="next"`)) {
       requestUrl = response.headers.get("Link").split(";")[0].slice(1, -1); // pagination urls are in Link header for some endpoints
     } else if(idDirection === "descending") {
