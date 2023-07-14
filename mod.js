@@ -92,6 +92,7 @@ export async function userHandleToId({userHandle}) {
   if(userHandleToIdCache.has(userHandle)) return userHandleToIdCache.get(userHandle);
   let {instanceDomain, username} = _userHandleToUsernameAndDomain({userHandle});
   let userData = await fetch(`https://${instanceDomain}/api/v1/accounts/lookup?acct=${username}`).then(r => r.json());
+  if(userData.error) throw new Error(userData.error);
   userHandleToIdCache.set(userHandle, userData.id);
   return userData.id;
 }
