@@ -29,7 +29,7 @@ await m.getUsersKnownToInstance({instanceDomain:"mastodon.social"});
 
 
 
-https://github.com/josephrocca/public-mastodon-data.js/assets/1167575/fbe35a6a-c41b-4ff5-a2a8-ee8c29de0a85
+![[asseets]](https://github.com/josephrocca/public-mastodon-data.js/assets/1167575/fbe35a6a-c41b-4ff5-a2a8-ee8c29de0a85)
 
 
 
